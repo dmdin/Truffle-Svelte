@@ -1,16 +1,59 @@
 <script>
+  import {time} from './timer';
+
   export let debt;
   export let myAddress;
+  export let ExpirationCall = _ => {
+  };
+  export let TakeCall = _ => {
+  };
+  export let ReturnCall = _ => {
+  };
+
+  const statuses = {0: 'Expired', 1: 'Open', 2: 'Taken', 3: 'Finished'}
+
   const nullAddress = '0x0000000000000000000000000000000000000000';
-  let [debtorAddress, borrowerAddress, sum, untilDate, creationDate, expired] = debt;
+  let [debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status] = debt;
+
+  sum = sum / 10 ** 18;
+  plus = +plus;
+  status = statuses[status];
   untilDate = new Date(untilDate * 1000);
   creationDate = new Date(creationDate * 1000);
-
-  if (Date.now() < untilDate) {
-    setTimeout(() => expired = true, untilDate - Date.now())
-  } else {
-    expired = true;
+  let expirationTimeout;
+  if (Date.now() < untilDate && status !== "Finished") {
+    expirationTimeout = setTimeout(async () => {
+      ExpirationCall();
+    }, untilDate - Date.now())
+  } else if (status != "Finished") {
+    console.log(status)
+    status = 'Expired';
   }
+
+  function getTimeRemaining(endtime, time) {
+    const total = endtime - time;
+    const seconds = Math.floor((total / 1000) % 60);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+    const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(total / (1000 * 60 * 60 * 24));
+
+    let res = '';
+    if (days > 0) {
+      res += `${days}d `
+    }
+    if (hours > 0) {
+      res += `${hours}h `
+    }
+    if (days === 0) {
+      res += `${minutes}m `
+    }
+    if (seconds > 0 && days === 0 && hours === 0) {
+      res += `${seconds}s`
+    }
+    return res;
+  }
+
+  $: timeLeft = getTimeRemaining(untilDate, $time);
 
   function formatDate(date) {
     let d = date;
@@ -28,27 +71,40 @@
 <div class="component">
   <div class="left-column">
     <h1 class="eth">{sum} ETH</h1>
-    {#if debtorAddress === myAddress}
+    {#if borrowerAddress === myAddress}
       <p>You are a borrower</p>
     {:else}
-      <button on:click={_=>{}}>Debtor: {debtorAddress}</button>
+      <p>from: <a href="/#/{borrowerAddress}">{borrowerAddress}</a></p>
     {/if}
-    {#if borrowerAddress === myAddress}
+    {#if debtorAddress === myAddress}
       <p>You are a debtor</p>
-    {:else if borrowerAddress === nullAddress}
+    {:else if debtorAddress === nullAddress}
       <p>No one took it</p>
     {:else}
-      <button>Borrower: {borrowerAddress}</button>
+      <p>to: <a>{debtorAddress}</a></p>
     {/if}
   </div>
   <div class="right-column">
-    <p>{formatDate(untilDate)}</p>
-    <p>{formatDate(creationDate)}</p>
-    {#if !expired}
-      <p>Expired: <i class="green">No</i></p>
-    {:else}
-      <p>Expired: <i class="red">Yes</i></p>
+    <p>Created: {formatDate(creationDate)}</p>
+    {#if status !== 'Expired' && status !== 'Finished'}
+      <p>Time left: {timeLeft}</p>
     {/if}
+    <div class="status">
+      <p>Bonus: </p>
+      <p style="margin-left: 0;">{plus}ETH</p>
+    </div>
+    <div class="status">
+      <p>Status: </p>
+      <p style="color: var({status === 'Expired' ? '--red-color' : '--green-color'}); margin-left: 0;">{status}</p>
+    </div>
+    <div class="buttons">
+      <button class="button" disabled={status !== "Open"} on:click={TakeCall}>Take it</button>
+      {#if debtorAddress === myAddress}
+        <button class="button" disabled={status !== "Taken" && status !== "Expired"}
+                on:click={_ => {ReturnCall(sum + plus); clearTimeout(expirationTimeout)}}>Return
+        </button>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -58,19 +114,45 @@
     border-radius: 20px;
     background: #eae8e9;
     box-shadow: 16px 16px 38px #c7c5c6, -16px -16px 38px #ffffff;
-    max-width: 500px;
+    max-width: 600px;
     width: 70%;
     display: flex;
-    padding: 30px;
-    margin: 20px;
-    justify-content: space-evenly;
+    padding: 30px 60px;
+    margin: 40px;
+    justify-content: space-between;
   }
 
-  .left-column, .right-column{
+  .button {
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 75px;
+    border-radius: 20px;
+    color: white;
+    background: #7699d4;
+    border: none;
+    cursor: pointer;
+  }
+
+  .button:disabled {
+    background: #8f8f8f;
+  }
+
+  .left-column, .right-column {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    max-width: 300px;
+  }
+
+  .status {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .right-column {
+    justify-content: flex-end;
+    width: 230px;
   }
 
   h1 {
@@ -84,14 +166,19 @@
   }
 
   p {
-    color: #03191E;
+    color: #14213d;
     font-size: 18px;
     font-family: var(--main-font);
-    margin: 5px;
+    margin: 5px 5px 5px 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 250px;
   }
 
   .eth {
     color: #645986;
     font-size: 4em;
   }
+
 </style>
