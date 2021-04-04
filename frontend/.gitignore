@@ -3,3 +3,4 @@
 /.yarn/
 
 .DS_Store
+.yarnrc.yml
