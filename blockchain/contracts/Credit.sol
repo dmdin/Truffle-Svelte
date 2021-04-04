@@ -43,7 +43,7 @@ contract Credit {
         return (debt.debtor, debt.borrower, debt.sum, debt.plus, debt.untilDate, debt.creationDate, debt.status);
     }
 
-    function synchronizeBorrower(address user, uint index) private{
+    function synchronize(address user, uint index) private{
         debt = credits[user][index];
         for (uint i = 0; i < credits[debt.borrower].length; i++) {
             checkDebt = credits[debt.borrower][i];
@@ -56,24 +56,26 @@ contract Credit {
             if (checkDebt.creationDate != debt.creationDate){
                 continue;
             }
+
+//            if (checkDebt.debtor == address (0))
+//            TODO double side sync
             credits[debt.borrower][i] = debt;
             break;
         }
     }
     function returnDebt(uint index) public payable {
         debt = credits[msg.sender][index];
-//        require(msg.value < debt.sum + debt.plus, "Not enough value");
         debt.borrower.transfer(msg.value);
         debt.status = Status.Finished;
         credits[msg.sender][index] = debt;
-        synchronizeBorrower(msg.sender, index);
+        synchronize(msg.sender, index);
     }
 
     function debtExpired(address user, uint index) public returns (bool success){
         debt = credits[user][index];
         if (debt.status != Status.Finished){
             debt.status = Status.Expired;
-            synchronizeBorrower(user, index);
+            synchronize(user, index);
         }
         return true;
     }

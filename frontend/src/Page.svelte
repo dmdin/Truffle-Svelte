@@ -103,7 +103,7 @@
       </div>
       <div class="debts">
         {#each debts as debt, i}
-          <p>{JSON.stringify(debt)}</p>
+          <!--TODO Update component-->
           <Debt myAddress={myAddress} debt={Object.values(debt)}
                 ExpirationCall={_ => expired(showAddress, i)}
                 TakeCall={_ => takeDebt(showAddress, i)}
