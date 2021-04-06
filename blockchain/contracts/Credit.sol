@@ -15,7 +15,6 @@ contract Credit {
     Debt debt;
     Debt checkDebt;
     mapping(address => Debt[]) credits;
-    mapping(address => uint) rank;
 
     function createDebt(uint plus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
         debt = Debt(address(0), msg.sender, msg.value, plus, block.timestamp + period, block.timestamp, Status.Open);

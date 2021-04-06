@@ -47,11 +47,6 @@
     );
   }
 
-  onMount(async () => {
-    await ethStore.setProvider(provider);
-    accounts = await $web3.eth.getAccounts();
-  })
-
   async function update() {
     coins = await getCoins(showAddress);
     instance = await getContract(myAddress);
@@ -76,6 +71,12 @@
     await instance.methods.returnDebt(index).send();
   }
 
+  onMount(async () => {
+    await ethStore.setProvider(provider);
+    accounts = await $web3.eth.getAccounts();
+    me = {value: accounts[1], label: accounts[1]}
+    other = {value: accounts[1], label: accounts[1]}
+  })
   let me, other;
   $: myAddress = me && me.value || accounts[0];
   $: showAddress = (other && other.value) || myAddress;
@@ -150,7 +151,7 @@
 
   .spinner-wrapper {
     /*width: 100%;*/
-    height: 80vh;
+    height: 60vh;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -38,9 +38,11 @@
     --green-color: #58BC82;
     background: var(--main-color);
   }
+
   .green {
     color: var(--green-color);
   }
+
   .red {
     color: var(--red-color);
   }
