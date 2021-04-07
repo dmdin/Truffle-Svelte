@@ -59,17 +59,23 @@
     let debt = await instance.methods.createDebt(2, 1000).send({
       from: myAddress, value: await $web3.utils.toWei(eth.toString(), 'ether')
     });
-    debts = await getDebts(myAddress);
+    await update();
   }
 
   async function takeDebt(address, index) {
     await instance.methods.useDebt(address, index).send();
-    debts = await getDebts(address);
+    await update();
   }
 
-  async function returnDebt(address, index, value) {
-    await instance.methods.returnDebt(index).send();
+  async function returnDebt(address, index) {
+    let debt = await instance.methods.getDebts(address, index).call();
+    let eth = debt[2] / 10 ** 18 + debt[3];
+    await instance.methods.returnDebt(index).send({
+      from: address, value: await $web3.utils.toWei(eth.toString(), 'ether')
+    });
+    await update()
   }
+
 
   onMount(async () => {
     await ethStore.setProvider(provider);
@@ -80,6 +86,17 @@
   let me, other;
   $: myAddress = me && me.value || accounts[0];
   $: showAddress = (other && other.value) || myAddress;
+
+  const statuses = {0: 'Expired', 1: 'Open', 2: 'Taken', 3: 'Finished'}
+  function unpackDebt(debt) {
+    let [debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status] = Object.values(debt);
+    sum = sum / 10 ** 18;
+    plus = +plus;
+    status = statuses[status];
+    untilDate = new Date(untilDate * 1000);
+    creationDate = new Date(creationDate * 1000);
+    return {debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status};
+  }
 </script>
 
 
@@ -105,7 +122,7 @@
       <div class="debts">
         {#each debts as debt, i}
           <!--TODO Update component-->
-          <Debt myAddress={myAddress} debt={Object.values(debt)}
+          <Debt myAddress={myAddress} {...unpackDebt(debt)}
                 ExpirationCall={_ => expired(showAddress, i)}
                 TakeCall={_ => takeDebt(showAddress, i)}
                 ReturnCall={(value) => returnDebt(showAddress, i, value)}
@@ -169,15 +186,6 @@
     cursor: pointer;
   }
 
-  input {
-    border: none;
-    border-bottom: 1px solid transparent;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    transition: border-bottom-color 0.7s ease;
-  }
-
   h1 {
     font-family: var(--main-font);
     font-size: 70px;
@@ -195,15 +203,5 @@
     white-space: nowrap;
   }
 
-  p {
-    color: #14213d;
-    font-size: 18px;
-    font-family: var(--main-font);
-    margin: 5px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    max-width: 300px;
-  }
 
 </style>

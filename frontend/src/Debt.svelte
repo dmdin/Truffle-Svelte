@@ -1,8 +1,7 @@
 <script>
   import {time} from './timer';
 
-  export let debt;
-  export let myAddress;
+  export let debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status, myAddress;
   export let ExpirationCall = _ => {
   };
   export let TakeCall = _ => {
@@ -10,16 +9,7 @@
   export let ReturnCall = _ => {
   };
 
-  const statuses = {0: 'Expired', 1: 'Open', 2: 'Taken', 3: 'Finished'}
-
   const nullAddress = '0x0000000000000000000000000000000000000000';
-  let [debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status] = debt;
-
-  sum = sum / 10 ** 18;
-  plus = +plus;
-  status = statuses[status];
-  untilDate = new Date(untilDate * 1000);
-  creationDate = new Date(creationDate * 1000);
   let expirationTimeout;
   if (Date.now() < untilDate && status !== "Finished") {
     expirationTimeout = setTimeout(async () => {
