@@ -1,18 +1,18 @@
 <script>
-  import {location} from 'svelte-spa-router';
   import {ethStore, web3, selectedAccount, connected, chainName, nativeCurrency} from 'svelte-web3';
   import {Circle3} from 'svelte-loading-spinners';
+  import Select from 'svelte-select';
+  import Modal from './Modal.svelte';
   import {onMount} from 'svelte';
   import Debt from './Debt.svelte';
   import Credit from 'compiledContracts/Credit.json';
-  import Select from 'svelte-select';
+
 
   const provider = 'http://localhost:7545';
 
   let myAddress, coins, input, instance;
   let accounts = [];
   let showAddress;
-  let readonly = true;
   let debts = [];
 
   async function getDebts(address) {
@@ -53,11 +53,9 @@
     debts = await getDebts(showAddress);
   }
 
-  async function createDebt() {
-    let eth = 1;
-    // await deposit(myAddress, eth);
-    let debt = await instance.methods.createDebt(2, 1000).send({
-      from: myAddress, value: await $web3.utils.toWei(eth.toString(), 'ether')
+  async function createDebt(amount = 1, bonus = 2, period = 1000) {
+    let debt = await instance.methods.createDebt(bonus, period).send({
+      from: myAddress, value: await $web3.utils.toWei(amount.toString(), 'ether')
     });
     await update();
   }
@@ -88,6 +86,7 @@
   $: showAddress = (other && other.value) || myAddress;
 
   const statuses = {0: 'Expired', 1: 'Open', 2: 'Taken', 3: 'Finished'}
+
   function unpackDebt(debt) {
     let [debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status] = Object.values(debt);
     sum = sum / 10 ** 18;
@@ -97,12 +96,16 @@
     creationDate = new Date(creationDate * 1000);
     return {debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status};
   }
+
+  let open = false;
+
 </script>
 
 
 <main>
   <h1 class="text-gray-600">Open Credits</h1>
   {#if $connected}
+    <Modal bind:open {coins} clickCallback={createDebt}/>
     <div class="selects">
       <Select placeholder="Choose your address" items={accounts}
               bind:selectedValue={me} on:select={update}/>
@@ -113,7 +116,8 @@
       <div class="header-wrapper">
         {#if myAddress === showAddress}
           <h2>My coins: {coins}ETH</h2>
-          <button class="button" on:click={createDebt}>New Debt</button>
+          <!--          <button class="button" on:click={createDebt}>New Debt</button>-->
+          <button class="button" on:click={_ => open = true}>New Debt</button>
         {:else}
           <h2>Coins: {coins}ETH</h2>
         {/if}
@@ -147,6 +151,12 @@
     width: 100%;
     min-height: calc(100% - 152px);
     margin: 0 auto;
+  }
+
+  .debts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .selects {
