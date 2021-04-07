@@ -4,7 +4,13 @@
   export let coins;
   export let open;
   export let clickCallback;
-  let credit = 0, bonus = 0, period = 1000;
+  let credit = 2, bonus = 1, period = 1000;
+  let time = "00:01";
+  let hours, minutes;
+  $: {
+    [hours, minutes] = time.split(":");
+    period = hours * 3600 + minutes * 60
+  }
   $: enough = credit + bonus < coins;
   let component;
 </script>
@@ -31,6 +37,10 @@
           Bonus:
           <input bind:value={bonus} type="number">
         </label>
+        <label>
+          Period:
+          <input id="appt-time" type="time" name="appt-time" bind:value={time}>
+        </label>
         <button class="create-button"
                 on:click={_ => {clickCallback(credit, bonus, period); open=false}}
                 disabled={!enough}>Create
@@ -56,7 +66,7 @@
     width: 40%;
     min-width: 300px;
     max-width: 600px;
-    height: 20%;
+    padding-bottom: 20px;
     background: #eae8e9;
     display: flex;
     flex-direction: column;
@@ -87,7 +97,7 @@
   }
 
   input {
-    width: 70px;
+    width: 80px;
     background: transparent;
     border-radius: 30px;
     transition: all 0.7s ease;

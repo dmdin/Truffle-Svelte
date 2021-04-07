@@ -97,7 +97,7 @@
     return {debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status};
   }
 
-  let open = false;
+  let open = true;
 
 </script>
 
