@@ -5,14 +5,14 @@
 A credit service written on [Svelte](https://svelte.dev/), [Truffle](https://www.trufflesuite.com/)
  and [Web3](https://web3js.readthedocs.io/en/v1.3.4/) for a blockchain course
 
-# 🚀 Startup
+### 🚀 Startup
 * Create a workspace in [Ganache](https://www.trufflesuite.com/docs/ganache/overview) and select _truffle-config.js_
 * Make migrations of contracts from the directory _blockchain_
-    ```
+    ```bash
     $: truffle migrate
     ```
 * Install dependencies and run Svelte app via _npm_ or _yarn_ from _frontend_ directory
-    ```
+    ```bash
     $: npm install
     $: npm run dev
     ```
