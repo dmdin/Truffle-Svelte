@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity >=0.4.25 <0.7.0;
 
 interface FlexToken {
     function name() external view returns (string memory);

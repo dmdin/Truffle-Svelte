@@ -1,5 +1,7 @@
 pragma solidity >=0.4.25 <0.7.0;
 
+import { BigFlexToken } from './BigFlexToken.sol';
+
 contract Credit {
     enum Status {Expired, Open, Taken, Finished}
     struct Debt {
@@ -18,13 +20,24 @@ contract Credit {
     Debt debtA;
     Debt debtB;
     mapping(address => Debt[]) credits;
+    address[] operators = new address[](0);
+
+    BigFlexToken token = new BigFlexToken('BigFlexToken', 'BFT', 10000, 1, operators);
 
     modifier isAllowed(uint index, Status status) {
         if (credits[msg.sender][index].status == status) {
             _;
         }
     }
+    // test (it works)
+    function getTokens() external view returns (uint256){
+        return token.totalSupply();
+    }
 
+    function burnTokens() external {
+        token.burn(1000, msg.data);
+    }
+    // test
     function createDebt(uint bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
         debt = Debt(address(0), msg.sender, 0, credits[msg.sender].length, msg.value, bonus, block.timestamp + period, block.timestamp, Status.Open);
         credits[msg.sender].push(debt);

@@ -1,28 +1,27 @@
-pragma solidity ^0.4.0;
-import { FlexToken } from './FlexToken.sol';
+pragma solidity >=0.4.25 <0.7.0;
 
-contract BigFlexToken is FlexToken{
+contract BigFlexToken {
     string internal _name;
     string internal _symbol;
     uint256 internal _granularity;
     uint256 internal _totalSupply = 0;
 
-    mapping(address => uint) internal _balances;
+    mapping(address => uint256) internal _balances;
     mapping(address => bool) internal _isDefaultOperator;
     mapping(address => mapping(address => bool)) internal _isAuthOperator;
-    mapping(addres => mapping(address => bool)) internal _isRevokedOperator;
+    mapping(address => mapping(address => bool)) internal _isRevokedOperator;
     address[] internal _defaultOperators;
 
-    constructor(string name, string symbol, uint initSupply, uint256 granularity, address[] defaultOperators) {
+    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address[] memory defaultOperators) public {
         _name = name;
         _symbol = symbol;
 
         // Минимально возможная часть токена (>=1)
-        require(granularity >= 1, "Granularity must be >= 1");
+//        require(granularity >= 1, "Granularity must be >= 1");
         _granularity = granularity;
 
         // Количество токенов всегда должно быть кратно _granularity
-        require(initSupply % _granularity == 0, "Err. The number of tokens must be a multiple of granularity");
+//        require(initSupply % _granularity == 0, "Err. The number of tokens must be a multiple of granularity");
 
         // Отдаем все токены создателю
         _totalSupply = initSupply;
@@ -46,7 +45,7 @@ contract BigFlexToken is FlexToken{
         return _symbol;
     }
 
-    function totalSupply() external view returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 
@@ -63,7 +62,7 @@ contract BigFlexToken is FlexToken{
     }
 
     // Проверяет, является ли адрес operator оператором для holder
-    function isOperatorFor(address operator, address holder) external view returns (bool) {
+    function isOperatorFor(address operator, address holder) public view returns (bool) {
         return !_isRevokedOperator[holder][operator] && (_isDefaultOperator[operator] || _isAuthOperator[holder][operator]);
     }
 
@@ -93,10 +92,10 @@ contract BigFlexToken is FlexToken{
         sendTokens(from, to, amount, data, operatorData);
     }
 
-    function sendTokens(address from, address to, uint256 amount, bytes calldata data, bytes calldata operatorData) internal {
+    function sendTokens(address from, address to, uint256 amount, bytes memory data, bytes memory operatorData) internal {
         // Проверка адресов
-        require(from != 0x0, "Err. Sender's address can't be equal to 0");
-        require(to != 0x0, "Err. Recipient's address can't be equal to 0");
+        require(from != address(0), "Err. Sender's address can't be equal to 0");
+        require(to != address(0), "Err. Recipient's address can't be equal to 0");
 
         // Проверка, достаточно ли токенов у отправителя
         require(amount <= _balances[from], "Err. You don't have enough tokens to send");
@@ -121,9 +120,9 @@ contract BigFlexToken is FlexToken{
         burnTokens(from, amount, data, operatorData);
     }
 
-    function burnTokens(address from, uint256 amount, bytes calldata data, bytes calldata operatorData) internal {
+    function burnTokens(address from, uint256 amount, bytes memory data, bytes memory operatorData) internal {
         // Проверка адреса
-        require(from != 0x0, "Err. You can't burn tokens in address 0");
+        require(from != address(0), "Err. You can't burn tokens in address 0");
 
         // Проверка количества токенов на кратность
         require(amount % _granularity == 0, "Err. The number of tokens to be burned must be a multiple of granularity");
@@ -135,4 +134,32 @@ contract BigFlexToken is FlexToken{
         _totalSupply -= amount;
         emit Burned(msg.sender, from, amount, data, operatorData);
     }
+
+    event Sent(
+        address indexed operator,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        bytes data,
+        bytes operatorData
+    );
+    //    event Minted(
+    //        address indexed operator,
+    //        address indexed to,
+    //        uint256 amount,
+    //        bytes data,
+    //        bytes operatorData
+    //    );
+    event Burned(
+        address indexed operator,
+        address indexed from,
+        uint256 amount,
+        bytes data,
+        bytes operatorData
+    );
+    event AuthorizedOperator(
+        address indexed operator,
+        address indexed holder
+    );
+    event RevokedOperator(address indexed operator, address indexed holder);
 }
