@@ -19,6 +19,12 @@ contract Credit {
     Debt debtB;
     mapping(address => Debt[]) credits;
 
+    modifier isAllowed(uint index, Status status) {
+        if (credits[msg.sender][index].status == status) {
+            _;
+        }
+    }
+
     function createDebt(uint bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
         debt = Debt(address(0), msg.sender, 0, credits[msg.sender].length, msg.value, bonus, block.timestamp + period, block.timestamp, Status.Open);
         credits[msg.sender].push(debt);
@@ -56,7 +62,7 @@ contract Credit {
         credits[userB][indexB] = debtB;
     }
 
-    function returnDebt(uint index) public payable {
+    function returnDebt(uint index) public isAllowed(index, Status.Expired) payable {
         debt = credits[msg.sender][index];
         require(debt.bonus + debt.sum <= msg.value, "Not enough money to return");
         debt.borrower.transfer(msg.value);
