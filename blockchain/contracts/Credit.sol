@@ -22,20 +22,26 @@ contract Credit {
     mapping(address => Debt[]) credits;
     address[] operators = new address[](0);
 
-    BigFlexToken token = new BigFlexToken('BigFlexToken', 'BFT', 10000, 1, operators);
+    BigFlexToken _token;
+
+    constructor (address token) public{
+        _token = BigFlexToken(token);
+    }
 
     modifier isAllowed(uint index, Status status) {
         if (credits[msg.sender][index].status == status) {
             _;
         }
     }
-    // test (it works)
-    function getTokens() external view returns (uint256){
-        return token.totalSupply();
+
+    function tokenBalance(address wallet) external view returns(uint256) {
+        return _token.balanceOf(wallet);
     }
 
+    // test (it works)
+
     function burnTokens() external {
-        token.burn(1000, msg.data);
+        _token.burn(1000, msg.data);
     }
     // test
     function createDebt(uint bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){

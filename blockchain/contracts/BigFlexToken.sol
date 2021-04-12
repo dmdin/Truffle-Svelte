@@ -5,34 +5,32 @@ contract BigFlexToken {
     string internal _symbol;
     uint256 internal _granularity;
     uint256 internal _totalSupply = 0;
-
     mapping(address => uint256) internal _balances;
     mapping(address => bool) internal _isDefaultOperator;
     mapping(address => mapping(address => bool)) internal _isAuthOperator;
     mapping(address => mapping(address => bool)) internal _isRevokedOperator;
     address[] internal _defaultOperators;
 
-    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address[] memory defaultOperators) public {
+
+    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity) public {
         _name = name;
         _symbol = symbol;
-
         // Минимально возможная часть токена (>=1)
-//        require(granularity >= 1, "Granularity must be >= 1");
+        require(granularity >= 1, "Granularity must be >= 1");
         _granularity = granularity;
 
         // Количество токенов всегда должно быть кратно _granularity
-//        require(initSupply % _granularity == 0, "Err. The number of tokens must be a multiple of granularity");
+        require(initSupply % _granularity == 0, "Err. The number of tokens must be a multiple of granularity");
 
         // Отдаем все токены создателю
         _totalSupply = initSupply;
         _balances[msg.sender] = _totalSupply;
-
         // Добавляем операторы по умолчанию,
         // эти адреса могут совершать транзакции от лица любого другого адреса
-        _defaultOperators = defaultOperators;
-        for (uint256 ind = 0; ind < _defaultOperators.length; ind++) {
-            _isDefaultOperator[_defaultOperators[ind]] = true;
-        }
+//        _defaultOperators = defaultOperators;
+//        for (uint256 ind = 0; ind < _defaultOperators.length; ind++) {
+//            _isDefaultOperator[_defaultOperators[ind]] = true;
+//        }
     }
 
     // геттеры
@@ -55,6 +53,10 @@ contract BigFlexToken {
 
     function balanceOf(address holder) external view returns (uint256) {
         return _balances[holder];
+    }
+
+    function balance() external view returns (uint256) {
+        return _balances[msg.sender];
     }
 
     function defaultOperators() external view returns (address[] memory) {

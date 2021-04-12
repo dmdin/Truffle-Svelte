@@ -25,9 +25,7 @@
   }
 
   async function getCoins(address) {
-    let coins = await $web3.eth.getBalance(address);
-    coins = await $web3.utils.fromWei(coins);
-    coins = Math.round(coins * 100) / 100;
+    let coins = await instance.methods.tokenBalance(address).call();
     return coins;
   }
 
@@ -48,8 +46,8 @@
   }
 
   async function update() {
-    coins = await getCoins(showAddress);
     instance = await getContract(myAddress);
+    coins = await getCoins(showAddress);
     debts = await getDebts(showAddress);
   }
 
