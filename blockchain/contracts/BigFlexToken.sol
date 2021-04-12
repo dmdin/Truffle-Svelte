@@ -12,7 +12,6 @@ contract BigFlexToken {
     mapping(address => mapping(address => bool)) internal _isRevokedOperator;
     address[] internal _defaultOperators;
 
-//  TODO надо добавить в конструктор массив адресов defaultOperators и разобраться, как его передавать при деплое.
     constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address[] memory defaultOperators) public {
         _name = name;
         _symbol = symbol;
@@ -26,8 +25,7 @@ contract BigFlexToken {
         // Отдаем все токены создателю
         _totalSupply = initSupply;
         _balances[msg.sender] = _totalSupply;
-//        _defaultOperators.push(defaultOperator);
-//        _isDefaultOperator[defaultOperator] = true;
+
         // Добавляем операторы по умолчанию,
         // эти адреса могут совершать транзакции от лица любого другого адреса
         _defaultOperators = defaultOperators;
@@ -99,10 +97,10 @@ contract BigFlexToken {
         require(to != address(0), "Err. Recipient's address can't be equal to 0");
         emit checkTokens(from, to, amount, _balances[from]);
         // Проверка, достаточно ли токенов у отправителя
-//        require(amount <= _balances[from], "Err. You don't have enough tokens to send");
+        require(amount <= _balances[from], "Err. You don't have enough tokens to send");
 
         // Количество отправляемых токенов должно быть кратно _granularity
-//        require(amount % _granularity == 0, "Err. The number of tokens to be sent must be a multiple of granularity");
+        require(amount % _granularity == 0, "Err. The number of tokens to be sent must be a multiple of granularity");
 
         _balances[from] -= amount;
         _balances[to] += amount;
@@ -144,13 +142,6 @@ contract BigFlexToken {
         bytes data,
         bytes operatorData
     );
-    //    event Minted(
-    //        address indexed operator,
-    //        address indexed to,
-    //        uint256 amount,
-    //        bytes data,
-    //        bytes operatorData
-    //    );
     event Burned(
         address indexed operator,
         address indexed from,
