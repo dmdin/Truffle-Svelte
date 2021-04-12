@@ -15,16 +15,16 @@ contract Credit {
         uint creationDate;
         Status status;            // Must be sync
     }
-
+    uint256 tokensAmount = 1000000;
     Debt debt;
     Debt debtA;
     Debt debtB;
     mapping(address => Debt[]) credits;
     address[] defaultOperators = [address(this)];
-    BigFlexToken _token = new BigFlexToken("qwe", "w", 1000, 1, defaultOperators);
+    BigFlexToken _token = new BigFlexToken("qwe", "w", tokensAmount, 1, defaultOperators);
 
     constructor() public {
-        _token.send(msg.sender, 500, msg.data);
+        _token.send(msg.sender, tokensAmount, msg.data);
     }
 
 
