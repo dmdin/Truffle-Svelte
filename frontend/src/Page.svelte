@@ -52,9 +52,7 @@
   }
 
   async function createDebt(amount = 1, bonus = 2, period = 1000) {
-    let debt = await instance.methods.createDebt(bonus, period).send({
-      from: myAddress, value: await $web3.utils.toWei(amount.toString(), 'ether')
-    });
+    await instance.methods.createDebt(amount, bonus, period).send();
     await update();
   }
 

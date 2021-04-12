@@ -20,12 +20,11 @@ contract Credit {
     Debt debtA;
     Debt debtB;
     mapping(address => Debt[]) credits;
-    address[] operators = new address[](0);
 
-    BigFlexToken _token;
+    BigFlexToken _token = new BigFlexToken("qwe", "w", 1000, 1, address(this));
 
-    constructor (address token) public{
-        _token = BigFlexToken(token);
+    constructor() public {
+        _token.send(msg.sender, 500, msg.data);
     }
 
     modifier isAllowed(uint index, Status status) {
@@ -44,9 +43,11 @@ contract Credit {
         _token.burn(1000, msg.data);
     }
     // test
-    function createDebt(uint bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
-        debt = Debt(address(0), msg.sender, 0, credits[msg.sender].length, msg.value, bonus, block.timestamp + period, block.timestamp, Status.Open);
+    function createDebt(uint256 sum, uint256 bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
+        require(_token.balanceOf(msg.sender) >= sum, "Err. There isn't enough tokens to create debt");
+        debt = Debt(address(0), msg.sender, 0, credits[msg.sender].length, sum, bonus, block.timestamp + period, block.timestamp, Status.Open);
         credits[msg.sender].push(debt);
+        _token.operatorSend(msg.sender, address(this), sum, msg.data, msg.data);
         return (debt.debtor, debt.borrower, debt.sum, debt.bonus, debt.untilDate, debt.creationDate, debt.status);
     }
 

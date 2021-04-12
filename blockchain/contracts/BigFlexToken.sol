@@ -5,14 +5,15 @@ contract BigFlexToken {
     string internal _symbol;
     uint256 internal _granularity;
     uint256 internal _totalSupply = 0;
+
     mapping(address => uint256) internal _balances;
     mapping(address => bool) internal _isDefaultOperator;
     mapping(address => mapping(address => bool)) internal _isAuthOperator;
     mapping(address => mapping(address => bool)) internal _isRevokedOperator;
     address[] internal _defaultOperators;
 
-
-    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity) public {
+//  TODO надо добавить в конструктор массив адресов defaultOperators и разобраться, как его передавать при деплое.
+    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address defaultOperator) public {
         _name = name;
         _symbol = symbol;
         // Минимально возможная часть токена (>=1)
@@ -25,6 +26,8 @@ contract BigFlexToken {
         // Отдаем все токены создателю
         _totalSupply = initSupply;
         _balances[msg.sender] = _totalSupply;
+        _defaultOperators.push(defaultOperator);
+        _isDefaultOperator[defaultOperator] = true;
         // Добавляем операторы по умолчанию,
         // эти адреса могут совершать транзакции от лица любого другого адреса
 //        _defaultOperators = defaultOperators;
@@ -53,10 +56,6 @@ contract BigFlexToken {
 
     function balanceOf(address holder) external view returns (uint256) {
         return _balances[holder];
-    }
-
-    function balance() external view returns (uint256) {
-        return _balances[msg.sender];
     }
 
     function defaultOperators() external view returns (address[] memory) {
@@ -93,17 +92,17 @@ contract BigFlexToken {
         "Err. You aren't operator for this outgoing address");
         sendTokens(from, to, amount, data, operatorData);
     }
-
+    event checkTokens(address, address, uint256, uint256);
     function sendTokens(address from, address to, uint256 amount, bytes memory data, bytes memory operatorData) internal {
         // Проверка адресов
         require(from != address(0), "Err. Sender's address can't be equal to 0");
         require(to != address(0), "Err. Recipient's address can't be equal to 0");
-
+        emit checkTokens(from, to, amount, _balances[from]);
         // Проверка, достаточно ли токенов у отправителя
-        require(amount <= _balances[from], "Err. You don't have enough tokens to send");
+//        require(amount <= _balances[from], "Err. You don't have enough tokens to send");
 
         // Количество отправляемых токенов должно быть кратно _granularity
-        require(amount % _granularity == 0, "Err. The number of tokens to be sent must be a multiple of granularity");
+//        require(amount % _granularity == 0, "Err. The number of tokens to be sent must be a multiple of granularity");
 
         _balances[from] -= amount;
         _balances[to] += amount;
