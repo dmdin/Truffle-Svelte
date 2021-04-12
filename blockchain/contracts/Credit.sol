@@ -27,22 +27,11 @@ contract Credit {
         _token.send(msg.sender, 500, msg.data);
     }
 
-    modifier isAllowed(uint index, Status status) {
-        if (credits[msg.sender][index].status == status) {
-            _;
-        }
-    }
 
     function tokenBalance(address wallet) external view returns(uint256) {
         return _token.balanceOf(wallet);
     }
 
-    // test (it works)
-
-    function burnTokens() external {
-        _token.burn(1000, msg.data);
-    }
-    // test
     function createDebt(uint256 sum, uint256 bonus, uint period) payable public returns (address, address, uint, uint, uint, uint, Status){
         require(_token.balanceOf(msg.sender) >= sum, "Err. There isn't enough tokens to create debt");
         debt = Debt(address(0), msg.sender, 0, credits[msg.sender].length, sum, bonus, block.timestamp + period, block.timestamp, Status.Open);
@@ -68,7 +57,7 @@ contract Credit {
         debt.debtorIndex = credits[msg.sender].length;
         credits[user][index] = debt;
         credits[msg.sender].push(debt);
-        msg.sender.transfer(debt.sum);
+        _token.send(msg.sender, debt.sum, msg.data);
         return (debt.debtor, debt.borrower, debt.sum, debt.bonus, debt.untilDate, debt.creationDate, debt.status);
     }
 
@@ -82,10 +71,10 @@ contract Credit {
         credits[userB][indexB] = debtB;
     }
 
-    function returnDebt(uint index) public isAllowed(index, Status.Expired) payable {
+    function returnDebt(uint index, uint256 value) public payable {
         debt = credits[msg.sender][index];
-        require(debt.bonus + debt.sum <= msg.value, "Not enough money to return");
-        debt.borrower.transfer(msg.value);
+        require(debt.bonus + debt.sum <= _token.balanceOf(msg.sender), "Not enough money to return");
+        _token.operatorSend(msg.sender, debt.borrower, value, msg.data, msg.data);
         debt.status = Status.Finished;
         credits[msg.sender][index] = debt;
         if (msg.sender == debt.borrower) {

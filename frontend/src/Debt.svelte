@@ -60,7 +60,7 @@
 
 <div class="component">
   <div class="left-column">
-    <h1 class="eth">{sum} ETH</h1>
+    <h1 class="eth">{sum} BFT</h1>
     {#if borrowerAddress === myAddress}
       <p>You are a borrower</p>
     {:else}
@@ -81,7 +81,7 @@
     {/if}
     <div class="status">
       <p>Bonus: </p>
-      <p style="margin-left: 0;">{plus}ETH</p>
+      <p style="margin-left: 0;">{plus}BFT</p>
     </div>
     <div class="status">
       <p>Status: </p>

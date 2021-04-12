@@ -63,10 +63,9 @@
 
   async function returnDebt(address, index) {
     let debt = await instance.methods.getDebts(address, index).call();
-    let eth = debt[2] / 10 ** 18 + debt[3];
-    await instance.methods.returnDebt(index).send({
-      from: address, value: await $web3.utils.toWei(eth.toString(), 'ether')
-    });
+    let value = parseInt(debt[2]) + parseInt(debt[3]);
+    console.log(value);
+    await instance.methods.returnDebt(index, value).send();
     await update()
   }
 
@@ -85,7 +84,6 @@
 
   function unpackDebt(debt) {
     let [debtorAddress, borrowerAddress, sum, plus, untilDate, creationDate, status] = Object.values(debt);
-    sum = sum / 10 ** 18;
     plus = +plus;
     status = statuses[status];
     untilDate = new Date(untilDate * 1000);
@@ -111,11 +109,11 @@
     {#if me && other}
       <div class="header-wrapper">
         {#if myAddress === showAddress}
-          <h2>My coins: {coins}ETH</h2>
+          <h2>My coins: {coins} BigFlexTokens</h2>
           <!--          <button class="button" on:click={createDebt}>New Debt</button>-->
           <button class="button" on:click={_ => open = true}>New Debt</button>
         {:else}
-          <h2>Coins: {coins}ETH</h2>
+          <h2>Coins: {coins} BigFlexTokens</h2>
         {/if}
 
       </div>
