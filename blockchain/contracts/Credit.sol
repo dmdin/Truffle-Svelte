@@ -20,8 +20,8 @@ contract Credit {
     Debt debtA;
     Debt debtB;
     mapping(address => Debt[]) credits;
-
-    BigFlexToken _token = new BigFlexToken("qwe", "w", 1000, 1, address(this));
+    address[] defaultOperators = [address(this)];
+    BigFlexToken _token = new BigFlexToken("qwe", "w", 1000, 1, defaultOperators);
 
     constructor() public {
         _token.send(msg.sender, 500, msg.data);

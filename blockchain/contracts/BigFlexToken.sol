@@ -13,7 +13,7 @@ contract BigFlexToken {
     address[] internal _defaultOperators;
 
 //  TODO надо добавить в конструктор массив адресов defaultOperators и разобраться, как его передавать при деплое.
-    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address defaultOperator) public {
+    constructor(string memory name, string memory symbol, uint256 initSupply, uint256 granularity, address[] memory defaultOperators) public {
         _name = name;
         _symbol = symbol;
         // Минимально возможная часть токена (>=1)
@@ -26,14 +26,14 @@ contract BigFlexToken {
         // Отдаем все токены создателю
         _totalSupply = initSupply;
         _balances[msg.sender] = _totalSupply;
-        _defaultOperators.push(defaultOperator);
-        _isDefaultOperator[defaultOperator] = true;
+//        _defaultOperators.push(defaultOperator);
+//        _isDefaultOperator[defaultOperator] = true;
         // Добавляем операторы по умолчанию,
         // эти адреса могут совершать транзакции от лица любого другого адреса
-//        _defaultOperators = defaultOperators;
-//        for (uint256 ind = 0; ind < _defaultOperators.length; ind++) {
-//            _isDefaultOperator[_defaultOperators[ind]] = true;
-//        }
+        _defaultOperators = defaultOperators;
+        for (uint256 ind = 0; ind < _defaultOperators.length; ind++) {
+            _isDefaultOperator[_defaultOperators[ind]] = true;
+        }
     }
 
     // геттеры
