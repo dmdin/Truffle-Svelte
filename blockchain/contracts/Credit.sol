@@ -21,7 +21,8 @@ contract Credit {
     Debt debtB;
     mapping(address => Debt[]) credits;
     address[] defaultOperators = [address(this)];
-    BigFlexToken _token = new BigFlexToken("qwe", "w", tokensAmount, 1, defaultOperators);
+
+    BigFlexToken _token = new BigFlexToken("Big Flex Token", "BFT", tokensAmount, 1, defaultOperators);
 
     constructor() public {
         _token.send(msg.sender, tokensAmount, msg.data);

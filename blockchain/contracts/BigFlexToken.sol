@@ -90,12 +90,11 @@ contract BigFlexToken {
         "Err. You aren't operator for this outgoing address");
         sendTokens(from, to, amount, data, operatorData);
     }
-    event checkTokens(address, address, uint256, uint256);
+
     function sendTokens(address from, address to, uint256 amount, bytes memory data, bytes memory operatorData) internal {
         // Проверка адресов
         require(from != address(0), "Err. Sender's address can't be equal to 0");
         require(to != address(0), "Err. Recipient's address can't be equal to 0");
-        emit checkTokens(from, to, amount, _balances[from]);
         // Проверка, достаточно ли токенов у отправителя
         require(amount <= _balances[from], "Err. You don't have enough tokens to send");
 
