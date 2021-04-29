@@ -1,4 +1,4 @@
-pragma solidity >=0.4.25 <0.7.0;
+pragma solidity 0.6.1;
 
 import { BigFlexToken } from './BigFlexToken.sol';
 
@@ -25,9 +25,12 @@ contract Credit {
     BigFlexToken _token = new BigFlexToken("Big Flex Token", "BFT", tokensAmount, 1, defaultOperators);
 
     constructor() public {
-        _token.send(msg.sender, tokensAmount, msg.data);
+        _token.send(msg.sender, tokensAmount/4, msg.data);
     }
-
+    // Только для тестирования
+    function giveTokens() public {
+        _token.send(msg.sender, tokensAmount/4, msg.data);
+    }
 
     function tokenBalance(address wallet) external view returns(uint256) {
         return _token.balanceOf(wallet);
@@ -46,11 +49,13 @@ contract Credit {
     }
 
     function getDebts(address user, uint index) public returns (address, address, uint, uint, uint, uint, Status) {
+        require(credits[user].length > index && index >= 0, "Err. Index out of bounds");
         debt = credits[user][index];
         return (debt.debtor, debt.borrower, debt.sum, debt.bonus, debt.untilDate, debt.creationDate, debt.status);
     }
 
     function useDebt(address user, uint index) public payable returns (address, address, uint, uint, uint, uint, Status) {
+        require(credits[user].length > index && index >= 0, "Err. Index out of bounds");
         debt = credits[user][index];
         require(debt.status == Status.Open, "Debt is not allowed");
         debt.status = Status.Taken;
@@ -72,10 +77,11 @@ contract Credit {
         credits[userB][indexB] = debtB;
     }
 
-    function returnDebt(uint index, uint256 value) public payable {
+    function returnDebt(uint index) public payable {
+        require(credits[msg.sender].length > index && index >= 0, "Err. Index out of bounds");
         debt = credits[msg.sender][index];
         require(debt.bonus + debt.sum <= _token.balanceOf(msg.sender), "Not enough money to return");
-        _token.operatorSend(msg.sender, debt.borrower, value, msg.data, msg.data);
+        _token.operatorSend(msg.sender, debt.borrower, debt.bonus + debt.sum, msg.data, msg.data);
         debt.status = Status.Finished;
         credits[msg.sender][index] = debt;
         if (msg.sender == debt.borrower) {
@@ -86,6 +92,7 @@ contract Credit {
     }
 
     function debtExpired(address user, uint index) public {
+        require(credits[user].length > index && index >= 0, "Err. Index out of bounds");
         debt = credits[user][index];
         require(debt.status != Status.Finished, "Debt is Finished");
         debt.status = Status.Expired;

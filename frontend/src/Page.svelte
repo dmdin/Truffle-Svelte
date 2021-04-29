@@ -62,10 +62,10 @@
   }
 
   async function returnDebt(address, index) {
-    let debt = await instance.methods.getDebts(address, index).call();
-    let value = parseInt(debt[2]) + parseInt(debt[3]);
-    console.log(value);
-    await instance.methods.returnDebt(index, value).send();
+    // let debt = await instance.methods.getDebts(address, index).call();
+    // let value = parseInt(debt[2]) + parseInt(debt[3]);
+    // console.log(value);
+    await instance.methods.returnDebt(index).send();
     await update()
   }
 
