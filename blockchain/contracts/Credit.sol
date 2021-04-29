@@ -25,11 +25,11 @@ contract Credit {
     BigFlexToken _token = new BigFlexToken("Big Flex Token", "BFT", tokensAmount, 1, defaultOperators);
 
     constructor() public {
-        _token.send(msg.sender, tokensAmount/4, msg.data);
+        _token.send(msg.sender, tokensAmount/2, msg.data);
     }
     // Только для тестирования
     function giveTokens() public {
-        _token.send(msg.sender, tokensAmount/4, msg.data);
+        _token.send(msg.sender, tokensAmount/2, msg.data);
     }
 
     function tokenBalance(address wallet) external view returns(uint256) {
