@@ -1,3 +1,8 @@
+const Credit = artifacts.require('Credit')
+var assert = require('chai').assert
+var expect = require('chai').expect
+
+
 contract('Credit', (accounts) => {
     let tempcredit;
     var mainAccount = accounts[0];
