@@ -14,13 +14,13 @@ contract('Credit', (accounts) => {
     })
     
     describe('when we create contract firstly', () => {
-        it('it should be 500000 bigflextokens on account', async function(){
+        it('should be 500000 bigflextokens on account', async function(){
             const count = await tempcredit.tokenBalance(mainAccount);
             expect(count.valueOf().toNumber()).to.be.eq(500000, "there is no 500000 bigflextokens on account");
         })
     });
 
-   describe('when debt is create', () =>{
+   describe('when debt is created', () =>{
         it('should send less tokens than 500000', async function(){
             var pass = true
             try {
